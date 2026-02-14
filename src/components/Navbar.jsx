@@ -34,7 +34,7 @@ export default function Navbar() {
                 <Link to="/admin" className="bg-white text-black px-2 py-1 rounded">Admin</Link>
               ) : (
                 <div className="flex items-center gap-2">
-                  {/* DAGDAG: Link para makita ang orders */}
+                 
                   <Link to="/my-orders" className="hover:text-blue-400 mr-2">My Orders</Link>
                   <Link  className="bg-blue-600 text-white px-2 py-1 rounded">User</Link>
                 </div>

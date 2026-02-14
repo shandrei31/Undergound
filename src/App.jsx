@@ -11,6 +11,7 @@ import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Orders from "./pages/Orders";
+import AuthCallback from "./pages/AuthCallback";
 import ProtectedAdmin from "./components/ProtectedAdmin";
 
 export default function App() {
@@ -101,6 +102,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/my-orders" element={<Orders />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/admin" element={
             <ProtectedAdmin>
               <Admin />
