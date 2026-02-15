@@ -5,10 +5,18 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState("products");
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [formData, setFormData] = useState({ name: "", description: "", price: "", category: "Streetwear", image_url: "" });
+  const [formData, setFormData] = useState({ 
+    name: "", 
+    description: "", 
+    price: "", 
+    category: "Streetwear", 
+    image_url: "",
+    stock: 0 // added stock field
+  });
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ message: "", type: "" }); 
+
   useEffect(() => {
     fetchProducts();
     fetchOrders();
@@ -66,7 +74,7 @@ export default function Admin() {
         await supabase.from("products").insert([formData]);
         showToast("New product posted!", "success");
       }
-      setFormData({ name: "", description: "", price: "", category: "Streetwear", image_url: "" });
+      setFormData({ name: "", description: "", price: "", category: "Streetwear", image_url: "", stock: 0 });
       setEditingProduct(null);
       fetchProducts();
     } catch (err) {
@@ -93,7 +101,6 @@ export default function Admin() {
   return (
     <div className="max-w-7xl mx-auto p-6 min-h-screen bg-white relative">
 
-      
       {toast.message && (
         <div
           className={`fixed bottom-6 right-6 px-6 py-3 rounded shadow-lg text-white font-bold uppercase z-50 transition-all ${
@@ -122,6 +129,10 @@ export default function Admin() {
               <input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full p-3 border-2 border-black font-bold outline-none bg-gray-50 focus:bg-white" required />
             </div>
             <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-gray-400">Stock</label>
+              <input type="number" value={formData.stock} min={0} onChange={e => setFormData({...formData, stock: Number(e.target.value)})} className="w-full p-3 border-2 border-black font-bold outline-none bg-gray-50 focus:bg-white" required />
+            </div>
+            <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-gray-400">Image URL</label>
               <input type="text" value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} className="w-full p-3 border-2 border-black font-bold outline-none bg-gray-50 focus:bg-white" required />
             </div>
@@ -132,13 +143,19 @@ export default function Admin() {
             <button type="submit" disabled={loading} className="w-full bg-black text-white py-4 font-black uppercase hover:bg-white hover:text-black border-4 border-black transition-all text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]">
               {loading ? 'WAIT...' : (editingProduct ? 'SAVE CHANGES' : 'POST DROP')}
             </button>
-            {editingProduct && <button type="button" onClick={() => {setEditingProduct(null); setFormData({name:"", description:"", price:"", category:"Streetwear", image_url:""})}} className="w-full text-xs font-black uppercase underline mt-2 text-red-600 text-center">Cancel Edit</button>}
+            {editingProduct && <button type="button" onClick={() => {setEditingProduct(null); setFormData({name:"", description:"", price:"", category:"Streetwear", image_url:"", stock:0})}} className="w-full text-xs font-black uppercase underline mt-2 text-red-600 text-center">Cancel Edit</button>}
           </form>
 
           <div className="md:col-span-2 overflow-x-auto">
             <table className="w-full border-4 border-black">
               <thead className="bg-black text-white uppercase text-xs italic tracking-widest">
-                <tr><th className="p-4 text-left">Preview</th><th className="p-4 text-left">Details</th><th className="p-4 text-left">Price</th><th className="p-4 text-center">Manage</th></tr>
+                <tr>
+                  <th className="p-4 text-left">Preview</th>
+                  <th className="p-4 text-left">Details</th>
+                  <th className="p-4 text-left">Price</th>
+                  <th className="p-4 text-left">Stock</th> {/* new stock column */}
+                  <th className="p-4 text-center">Manage</th>
+                </tr>
               </thead>
               <tbody>
                 {products.map(p => (
@@ -146,7 +163,31 @@ export default function Admin() {
                     <td className="p-4 w-24"><img src={p.image_url} className="w-20 h-24 object-cover border-2 border-black" alt="" /></td>
                     <td className="p-4"><p className="text-xl font-black italic">{p.name}</p></td>
                     <td className="p-4 font-black text-lg">₱{Number(p.price).toLocaleString()}</td>
-                    <td className="p-4"><div className="flex flex-col gap-2"><button onClick={() => {setEditingProduct(p); setFormData(p)}} className="bg-blue-600 text-white p-2 text-[10px] border-2 border-black">EDIT</button><button onClick={() => handleDeleteProduct(p.id)} className="bg-red-600 text-white p-2 text-[10px] border-2 border-black">DELETE</button></div></td>
+                    <td className="p-4">
+                      <input 
+                        type="number"
+                        value={p.stock}
+                        min={0}
+                        onChange={async (e) => {
+                          const newStock = Number(e.target.value);
+                          setProducts(products.map(prod => prod.id === p.id ? {...prod, stock: newStock} : prod));
+                          try {
+                            await supabase.from('products').update({ stock: newStock }).eq('id', p.id);
+                            showToast(`Stock updated for ${p.name}`, 'success');
+                          } catch(err) {
+                            console.error(err);
+                            showToast('Failed to update stock!', 'error');
+                          }
+                        }}
+                        className="w-20 p-1 border-2 border-black text-center font-bold"
+                      />
+                    </td>
+                    <td className="p-4">
+                      <div className="flex flex-col gap-2">
+                        <button onClick={() => {setEditingProduct(p); setFormData(p)}} className="bg-blue-600 text-white p-2 text-[10px] border-2 border-black">EDIT</button>
+                        <button onClick={() => handleDeleteProduct(p.id)} className="bg-red-600 text-white p-2 text-[10px] border-2 border-black">DELETE</button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
