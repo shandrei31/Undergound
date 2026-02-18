@@ -13,7 +13,7 @@ export default function Products() {
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]);
 
-  // Debounce search
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -21,7 +21,7 @@ export default function Products() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Fetch products on filter change
+
   useEffect(() => {
     fetchProducts();
   }, [debouncedSearch, category]);
@@ -72,37 +72,37 @@ export default function Products() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 min-h-screen">
+    <div className="max-w-7xl mx-auto px-4 py-10 min-h-screen">
 
-     
-      <div className="grid md:grid-cols-3 gap-4 mb-10">
+      <div className="mb-10 text-center">
+        <h1 className="text-4xl font-black uppercase">Shop Products</h1>
+        <p className="opacity-60 mt-2">Discover your next streetwear fit</p>
+      </div>
 
-        
-        <div className="relative md:col-span-2">
+      <div className="flex flex-col md:flex-row gap-4 mb-8">
+
+        <div className="relative flex-1">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search..."
-            className="w-full border-2 border-black py-3 pl-10 pr-10 font-bold uppercase"
+            placeholder="Search products..."
+            className="w-full border rounded-xl py-3 px-4 font-bold focus:outline-none focus:ring"
           />
-
-          <span className="absolute left-3 top-1/2 -translate-y-1/2"> </span>
 
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 font-black"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-black"
             >
-              X
+              ✕
             </button>
           )}
         </div>
 
-       
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="border-2 border-black px-3 font-bold uppercase"
+          className="border rounded-xl px-4 font-bold"
         >
           <option value="">All Categories</option>
           {categories.map(c => (
@@ -112,15 +112,16 @@ export default function Products() {
 
       </div>
 
-      <button
-        onClick={clearFilters}
-        className="mb-8 underline font-black"
-      >
-        CLEAR FILTERS
-      </button>
+      <div className="mb-10 text-right">
+        <button
+          onClick={clearFilters}
+          className="text-sm font-black underline opacity-70 hover:opacity-100"
+        >
+          Clear Filters
+        </button>
+      </div>
 
-     
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
         {loading ? (
           <p className="col-span-full text-center font-black">Loading...</p>
@@ -128,31 +129,38 @@ export default function Products() {
           <p className="col-span-full text-center font-black">No products found.</p>
         ) : (
           products.map(p => (
-            <div key={p.id} className="flex flex-col h-full">
+            <div
+              key={p.id}
+              className="group border rounded-2xl overflow-hidden shadow hover:shadow-xl transition bg-white flex flex-col"
+            >
 
               <div
                 onClick={() => navigate(`/product/${p.id}`)}
-                className="aspect-[3/4] border-2 border-black cursor-pointer overflow-hidden"
+                className="relative aspect-[3/4] cursor-pointer overflow-hidden"
               >
                 <img
                   src={p.image_url}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
                 />
+
+                <span className="absolute top-3 left-3 bg-black text-white text-xs px-3 py-1 rounded-full uppercase">
+                  {p.category}
+                </span>
               </div>
 
-              <div className="flex flex-col flex-1">
+              <div className="p-4 flex flex-col flex-1">
 
-                <h2 className="font-black mt-3 uppercase line-clamp-2">
+                <h2 className="font-black uppercase line-clamp-2">
                   {p.name}
                 </h2>
 
-                <p className="font-black mt-1">
+                <p className="mt-1 font-bold text-lg">
                   ₱{Number(p.price).toLocaleString()}
                 </p>
 
                 <button
                   onClick={() => addToCart(p)}
-                  className="mt-auto bg-black text-white py-2 font-black uppercase"
+                  className="mt-auto bg-black text-white py-2 rounded-xl font-black uppercase hover:opacity-90 active:scale-95 transition"
                 >
                   Add to Cart
                 </button>

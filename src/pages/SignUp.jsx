@@ -51,7 +51,7 @@ export default function SignUp() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 text-black relative">
       
-      {/* Toast Notification */}
+      
       {toast.message && (
         <div
           className={`fixed bottom-6 right-6 px-6 py-3 rounded shadow-lg text-white font-bold uppercase z-50 transition-all ${
