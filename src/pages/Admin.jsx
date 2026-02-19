@@ -32,12 +32,15 @@ export default function Admin() {
   };
 
   const fetchProducts = async () => {
-    const { data } = await supabase
-      .from("products")
-      .select("*")
-      .order("id", { ascending: false });
-    setProducts(data || []);
-  };
+  const { data } = await supabase
+    .from("products")
+    .select("*")
+    .eq("is_archived", false) // 🔥 show only active products
+    .order("id", { ascending: false });
+
+  setProducts(data || []);
+};
+
 
   const fetchOrders = async () => {
     const { data } = await supabase
@@ -119,16 +122,22 @@ export default function Admin() {
 
 
   const handleDeleteProduct = async (id) => {
-    if (!window.confirm("Delete this product?")) return;
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) {
-      console.error(error.message);
-      showToast("Failed to delete product!", "error");
-    } else {
-      fetchProducts();
-      showToast("Product deleted!", "success");
-    }
-  };
+  if (!window.confirm("Delete this product?")) return;
+
+  const { error } = await supabase
+    .from("products")
+    .update({ is_archived: true }) 
+    .eq("id", id);
+
+  if (error) {
+    console.error(error.message);
+    showToast("Failed to delete product!", "error");
+  } else {
+    fetchProducts();
+    showToast("Product Deleted!", "success");
+  }
+};
+
 
 
   const filteredProducts = products.filter((p) => {

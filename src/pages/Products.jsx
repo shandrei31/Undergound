@@ -27,30 +27,32 @@ export default function Products() {
   }, [debouncedSearch, category]);
 
   const fetchProducts = async () => {
-    setLoading(true);
+  setLoading(true);
 
-    let query = supabase
-      .from("products")
-      .select("*")
-      .order("id", { ascending: false });
+  let query = supabase
+    .from("products")
+    .select("*")
+    .eq("is_archived", false) // 🔥 important
+    .order("id", { ascending: false });
 
-    if (debouncedSearch) {
-      query = query.ilike("name", `%${debouncedSearch}%`);
-    }
+  if (debouncedSearch) {
+    query = query.ilike("name", `%${debouncedSearch}%`);
+  }
 
-    if (category) {
-      query = query.eq("category", category);
-    }
+  if (category) {
+    query = query.eq("category", category);
+  }
 
-    const { data } = await query;
+  const { data } = await query;
 
-    setProducts(data || []);
+  setProducts(data || []);
 
-    const unique = [...new Set((data || []).map(p => p.category).filter(Boolean))];
-    setCategories(unique);
+  const unique = [...new Set((data || []).map(p => p.category).filter(Boolean))];
+  setCategories(unique);
 
-    setLoading(false);
-  };
+  setLoading(false);
+};
+
 
   const clearFilters = () => {
     setSearch("");
